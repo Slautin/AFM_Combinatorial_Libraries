@@ -1,0 +1,5 @@
+langgraph
+langchain-mcp-adapters
+pydantic
+pyyaml
+python-dotenv

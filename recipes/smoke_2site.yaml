@@ -1,0 +1,18 @@
+name: smoke_2site
+context: >
+  Smoke test, not science. Two sites 1 mm apart, one loop at the frame centre.
+  Run this after any change to the stage tool or the ensure_* tolerances.
+
+sites:
+  - {label: "S0", x_stage_m: 0.0,    y_stage_m: 0.0}
+  - {label: "S1", x_stage_m: -1.0e-3, y_stage_m: 0.0}
+
+per_site:
+  - kind: loop
+    points_m: [[0.0, 0.0],[.5e-6, 0.0]]
+    loop_settings:
+      v_dc_max_v: 20.0
+      frequency_hz: 0.3
+      var0_phase: 0.0
+      var1_pulsetime_s: 0.03
+      n_cycles: 3
