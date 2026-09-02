@@ -1,0 +1,51 @@
+name: plzt_grid
+context: PLZT combinatorial library. P0/P1 captured from the stage; composition varies
+  along the line. Four loops per site.
+sites:
+- label: r0c00
+  x_stage_m: 0.021071719
+  y_stage_m: 0.022923281
+- label: r0c01
+  x_stage_m: 0.016626614888888887
+  y_stage_m: 0.02298624988888889
+- label: r0c02
+  x_stage_m: 0.012181510777777778
+  y_stage_m: 0.02304921877777778
+- label: r0c03
+  x_stage_m: 0.0077364066666666675
+  y_stage_m: 0.023112187666666666
+- label: r0c04
+  x_stage_m: 0.003291302555555556
+  y_stage_m: 0.023175156555555555
+- label: r0c05
+  x_stage_m: -0.0011538015555555559
+  y_stage_m: 0.023238125444444445
+- label: r0c06
+  x_stage_m: -0.005598905666666664
+  y_stage_m: 0.023301094333333335
+- label: r0c07
+  x_stage_m: -0.010044009777777776
+  y_stage_m: 0.02336406322222222
+- label: r0c08
+  x_stage_m: -0.014489113888888887
+  y_stage_m: 0.02342703211111111
+- label: r0c09
+  x_stage_m: -0.018934218
+  y_stage_m: 0.023490001
+per_site:
+- kind: loop
+  points_m:
+  - - -1.0e-06
+    - -1.0e-06
+  - - 1.0e-06
+    - -1.0e-06
+  - - -1.0e-06
+    - 1.0e-06
+  - - 1.0e-06
+    - 1.0e-06
+  loop_settings:
+    v_dc_max_v: 20.0
+    frequency_hz: 0.3
+    var0_phase: 0.0
+    var1_pulsetime_s: 0.03
+    n_cycles: 3

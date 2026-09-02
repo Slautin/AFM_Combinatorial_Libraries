@@ -1,0 +1,65 @@
+name: plzt_grid
+context: AlScN PDAC_COM5_01448 combinatorial library. 200 um above the bottom electrodes
+  array. P0/P1 captured from the stage; composition varies along the line. Nine loops
+  per site.
+sites:
+- label: r0c00
+  x_stage_m: 0.020891
+  y_stage_m: 0.012123
+- label: r0c01
+  x_stage_m: 0.016891
+  y_stage_m: 0.0121796
+- label: r0c02
+  x_stage_m: 0.012891
+  y_stage_m: 0.012236200000000001
+- label: r0c03
+  x_stage_m: 0.008891
+  y_stage_m: 0.0122928
+- label: r0c04
+  x_stage_m: 0.0048909999999999995
+  y_stage_m: 0.0123494
+- label: r0c05
+  x_stage_m: 0.0008909999999999994
+  y_stage_m: 0.012406
+- label: r0c06
+  x_stage_m: -0.0031090000000000007
+  y_stage_m: 0.0124626
+- label: r0c07
+  x_stage_m: -0.007109000000000001
+  y_stage_m: 0.012519200000000001
+- label: r0c08
+  x_stage_m: -0.011109
+  y_stage_m: 0.0125758
+- label: r0c09
+  x_stage_m: -0.015109000000000004
+  y_stage_m: 0.0126324
+- label: r0c10
+  x_stage_m: -0.019109
+  y_stage_m: 0.012689
+per_site:
+- kind: loop
+  points_m:
+  - - -1.0e-06
+    - -1.0e-06
+  - - 1.0e-06
+    - -1.0e-06
+  - - -1.0e-06
+    - 1.0e-06
+  - - 1.0e-06
+    - 1.0e-06
+  - - 0.0
+    - 0.0
+  - - 0.0
+    - 2.0e-06
+  - - 0.0
+    - -2.0e-06
+  - - -2.0e-06
+    - 0.0
+  - - 2.0e-06
+    - 0.0
+  loop_settings:
+    v_dc_max_v: 20.0
+    frequency_hz: 0.3
+    var0_phase: 0.0
+    var1_pulsetime_s: 0.05
+    n_cycles: 3

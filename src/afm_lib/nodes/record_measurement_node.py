@@ -1,4 +1,6 @@
-from afm_lib.config import records_dir
+import shutil
+
+from afm_lib.config import cache_dir, records_dir
 from afm_lib.graphs.loop_analysis_graph import build_loop_analysis_graph
 from afm_lib.states.analysis_state import AnalysisState
 from afm_lib.states.lib_experiment_state import LibExperimentState
@@ -31,6 +33,11 @@ async def record_measurement_node(state: LibExperimentState) -> LibExperimentSta
     if out.get("kind") != "loop":
         raise RuntimeError(f"ordered a loop but the file classifies as "
                            f"{out.get('kind')!r}: {pending['file_path']}")
+
+    for ch in out.get("file_channels", {}).values():
+        ch.pop("array_path", None)
+        ch.pop("preview_path", None)
+    shutil.rmtree(cache_dir() / stem, ignore_errors=True)
 
     record = {**out,
               "instrument_params": state["instrument_state"],

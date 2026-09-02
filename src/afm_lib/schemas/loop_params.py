@@ -11,7 +11,12 @@ class LoopParams(BaseModel, frozen=True):
         description="PCA rotation angle applied to (X,Y); None if rotation disabled")
     quadrature_residual: Optional[float] = Field(
         description="std(Y')/std(X') after rotation; small = clean two-state switching")
-    n_cycles: int = Field(ge=1, description="Number of bias cycles detected")
+    n_cycles: int = Field(ge=1, description="Complete bias cycles USED for averaging. Lower than the "
+                          "requested n_cycles: the virgin 0->Vmax ramp and the final "
+                          "truncated ramp are not complete sweeps and are excluded")
+    n_sweeps_rising: int = Field(description="Complete rising sweeps found")
+    n_sweeps_falling: int = Field(description="Complete falling sweeps found")
+    n_points_used: int = Field(description="Samples inside the complete sweeps")
     branch_rms_noise: float = Field(
         ge=0, description="RMS scatter of points around cycle-averaged branches")
 

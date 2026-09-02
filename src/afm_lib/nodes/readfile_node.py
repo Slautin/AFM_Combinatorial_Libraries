@@ -1,6 +1,6 @@
 import numpy as np
 
-from afm_lib.config import cache_dir
+from afm_lib.config import cache_dir, SAVE_CHANNEL_PREVIEWS
 from afm_lib.readers.scifireaders_service import SciFiReadersService
 from afm_lib.states.analysis_state import AnalysisState
 from afm_lib.utils.channel_utils import save_array, save_preview, get_stats, fix_units
@@ -40,11 +40,12 @@ async def readfile_node(state: AnalysisState) -> AnalysisState:
         channels[k] = {kk: payload_dict['datasets'][k][kk] for kk in ch_keys}
         channels[k]['stats'] = get_stats(payload_dict['datasets'][k]['data'])
 
-        preview = save_preview(payload_dict['datasets'][k], dest)
-        if preview['ok']:
-            channels[k]['preview_path'] = preview['path']
-        else:
-            print(preview['error'])
+        if SAVE_CHANNEL_PREVIEWS:
+            preview = save_preview(payload_dict['datasets'][k], dest)
+            if preview['ok']:
+                channels[k]['preview_path'] = preview['path']
+            else:
+                print(preview['error'])
 
         dat = save_array(payload_dict['datasets'][k], dest)
         if dat['ok']:

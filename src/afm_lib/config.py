@@ -6,6 +6,8 @@ import sys
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]      # not Path().resolve()
 
+SAVE_CHANNEL_PREVIEWS = False
+
 SPM_MCP_SERVER_CONFIG = {
     "spm": {"transport": "streamable-http", "url": "http://127.0.0.1:8000/mcp"},
 }
