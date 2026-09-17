@@ -26,9 +26,9 @@ async def ensure_stage_node(state: MeasurementState) -> MeasurementState:
     print(f"[ensure_stage] ({here[0]*1e3:+.3f}, {here[1]*1e3:+.3f}) -> "
           f"({target[0]*1e3:+.3f}, {target[1]*1e3:+.3f}) mm")
 
-    data = await call("pfm_move_stage", {"x_stage_m": float(target[0]),
-                                         "y_stage_m": float(target[1]),
-                                         "approach_after": True})
+    data = await call("move_stage", {"x_stage_m": float(target[0]),
+                                     "y_stage_m": float(target[1]),
+                                     "approach_after": True})
 
     # if not data.get("feedback_on"):
     #     raise RuntimeError(

@@ -1,6 +1,8 @@
 from pydantic import BaseModel, Field
 from afm_lib.schemas.scanner_calibrations import ScannerCalibrations
 
+from afm_lib.config import MODES
+
 
 
 class ScanSettings(BaseModel, frozen=True):
@@ -34,6 +36,12 @@ class PFMExcitation(BaseModel, frozen=True):
     dart_igain: float = Field(description="Integral gain of the DART frequency-tracking loop")
     dart_width_hz: float = Field(description = "Width of the frequency window, separating the two drive frequencies, Hz. (f1,2 = drive_frequency_hz +/- dart_width_hz/2)")
 
+class ACExcitation(BaseModel, frozen=True):
+    """Single-frequency drive used by the AC (tapping) preset."""
+    drive_amplitude_v: float = Field(description="Z-feedback setpoint in volts: deflection under DART, "
+                                          "amplitude under AC (chosen by InstrumentState.mode)")
+    drive_frequency_hz: float = Field(description="Drive frequency, Hz (free resonance after tune)")
+
 class ContactFeedback(BaseModel, frozen=True):
     setpoint_v: float = Field(description="Deflection setpoint in volts, that determines the desired probe-sample contact force")
     gain: float = Field(description="Integral gain of the feedback loop controlling the probe height")
@@ -41,11 +49,13 @@ class ContactFeedback(BaseModel, frozen=True):
                                           "at the moment of the snapshot")
 
 class InstrumentState(BaseModel, frozen=True):
+    mode: str
     scan_settings: ScanSettings
     loop_settings: LoopSettings
     probe_position: ProbePosition | None = None
     stage_position: StagePosition
     pfm_excitation: PFMExcitation
+    ac_excitation: ACExcitation
     contact_feedback: ContactFeedback
 
 def to_instrument_state(
@@ -55,6 +65,10 @@ def to_instrument_state(
     
     #probe position
     x_m, y_m = None, None
+
+    mode = state_dict.get("mode")
+    if mode not in MODES:
+        raise ValueError(f"instrument reports mode {mode!r}, not in config.MODES")
     
     x_probe_lvdt_m, y_probe_lvdt_m = state_dict.get("x_probe_lvdt_m"), state_dict.get("y_probe_lvdt_m")
     if scanner_calibrations is not None and x_probe_lvdt_m is not None and y_probe_lvdt_m is not None:
@@ -96,17 +110,24 @@ def to_instrument_state(
         dart_width_hz = state_dict["f_dart_width_hz"],
     )
 
+    ac_excitation = ACExcitation(
+        drive_amplitude_v  = state_dict["v_ac_v"],
+        drive_frequency_hz = state_dict["f_drive_hz"],
+    )
+
     contact_feedback = ContactFeedback(
-        setpoint_v  = state_dict['setpoint_defl_v'],
+        setpoint_v  = state_dict[MODES[mode].setpoint_key],
         gain        = state_dict['igain'],
         feedback_on = bool(state_dict.get('feedback_on')),
     )
     
     return InstrumentState(
+        mode = mode,
         probe_position = probe_position,
         stage_position = stage_position,
         loop_settings = loop_settings,
         scan_settings = scan_settings,
         pfm_excitation = pfm_excitation,
+        ac_excitation=ac_excitation,
         contact_feedback = contact_feedback,
     )

@@ -29,7 +29,7 @@ async def ensure_tip_node(state: MeasurementState) -> MeasurementState:
     print(f"[ensure_tip] ({here[0]*1e6:+.4f}, {here[1]*1e6:+.4f}) -> "
           f"({target[0]*1e6:+.4f}, {target[1]*1e6:+.4f}) um")
 
-    data = await call("pfm_move_tip", {"x_m": float(target[0]), "y_m": float(target[1])})
+    data = await call("move_tip", {"x_m": float(target[0]), "y_m": float(target[1])})
 
     err = hypot(data.get("x_error_m") or 0.0, data.get("y_error_m") or 0.0)
     if err > TIP_TOL_M:

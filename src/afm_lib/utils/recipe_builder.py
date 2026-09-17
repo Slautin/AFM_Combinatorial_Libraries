@@ -4,6 +4,8 @@ import numpy as np
 import yaml
 
 from afm_lib.schemas.recipe import Recipe
+from afm_lib.config import MODE_DART
+from afm_lib.utils.geometry import stage_to_sample
 
 STAGE_LIMIT_M = 0.10        # matches STAGE_LIMIT_M in the MCP server's move_stage.py
 
@@ -71,44 +73,62 @@ def check_sites(sites, limit_m=STAGE_LIMIT_M):
     return problems
 
 
-def preview_sites(sites, limit_m=STAGE_LIMIT_M):
-    """Sanity plot of the site layout, in stage millimetres."""
+def preview_sites(sites, limit_m=STAGE_LIMIT_M, sample_frame=None):
+    """Sanity plot of the site layout: stage mm, and sample mm when a frame is given.
+    In the sample panel the labels r0c00 ... r0cNN must march along +x."""
     import matplotlib.pyplot as plt
 
-    x = [s["x_stage_m"] * 1e3 for s in sites]
-    y = [s["y_stage_m"] * 1e3 for s in sites]
+    panels = [("stage", [(s["x_stage_m"], s["y_stage_m"]) for s in sites])]
+    if sample_frame is not None:
+        f = sample_frame
+        panels.append(("sample", [stage_to_sample((s["x_stage_m"], s["y_stage_m"]),
+                                                  f["origin_stage_m"], f["direction"],
+                                                  f.get("mirror", False), f.get("axis", "x")) for s in sites]))
 
-    fig, ax = plt.subplots(figsize=(6, 5))
-    ax.plot(x, y, "-", lw=1, color="#c9ccd1", zorder=1)          # visit order
-    ax.scatter(x, y, s=28, color="#3b6ea5", zorder=2)
-    if len(sites) <= 24:
-        for s, xi, yi in zip(sites, x, y):
-            ax.annotate(s["label"], (xi, yi), textcoords="offset points",
-                        xytext=(5, 4), fontsize=7, color="#5a5f66")
-
-    ax.set_xlabel("stage X, mm")
-    ax.set_ylabel("stage Y, mm")
-    ax.set_title(f"{len(sites)} sites")
-    ax.set_aspect("equal")                                        # physical space
-    ax.grid(True, lw=0.5, color="#e6e8ea")
-    ax.set_axisbelow(True)
-    for spine in ("top", "right"):
-        ax.spines[spine].set_visible(False)
+    fig, axes = plt.subplots(1, len(panels), figsize=(6 * len(panels), 5), squeeze=False)
+    for ax, (name, pts) in zip(axes[0], panels):
+        x = [p[0] * 1e3 for p in pts]
+        y = [p[1] * 1e3 for p in pts]
+        ax.plot(x, y, "-", lw=1, color="#c9ccd1", zorder=1)          # visit order
+        ax.scatter(x, y, s=28, color="#3b6ea5", zorder=2)
+        if len(sites) <= 24:
+            for s, xi, yi in zip(sites, x, y):
+                ax.annotate(s["label"], (xi, yi), textcoords="offset points",
+                            xytext=(5, 4), fontsize=7, color="#5a5f66")
+        if name == "sample":
+            ax.scatter([0], [0], marker="+", s=80, color="#c0392b", zorder=3)   # origin
+        ax.set_xlabel(f"{name} X, mm"); ax.set_ylabel(f"{name} Y, mm")
+        ax.set_title(f"{len(sites)} sites — {name} frame")
+        ax.set_aspect("equal"); ax.grid(True, lw=0.5, color="#e6e8ea"); ax.set_axisbelow(True)
+        for spine in ("top", "right"):
+            ax.spines[spine].set_visible(False)
     plt.tight_layout()
     plt.show()
 
 
-def write_recipe(path, name, sites, loop_settings, points_m, context=""):
+def write_recipe(path, name, sites, *, mode=MODE_DART, context="",
+                 loop_settings=None, points_m=None, scan_settings=None,
+                 sample_frame=None):
     """Validate through the Recipe model, then write the YAML.
+    
+    Loop recipe : loop_settings + points_m  -> one LoopStep.
+    Scan recipe : scan_settings (one dict, or a list of dicts for several frames
+                  per site) -> one ScanStep per dict. Centre fields are offsets.
     Nothing is written if validation fails."""
-    data = {
-        "name": name,
-        "context": context,
-        "sites": sites,
-        "per_site": [{"kind": "loop",
-                      "points_m": [list(p) for p in points_m],
-                      "loop_settings": dict(loop_settings)}],
-    }
+
+    if (loop_settings is None) == (scan_settings is None):
+        raise ValueError("give exactly one of loop_settings or scan_settings")
+
+    if loop_settings is not None:
+        per_site = [{"kind": "loop",
+                     "points_m": [list(p) for p in points_m],
+                     "loop_settings": dict(loop_settings)}]
+    else:
+        frames = scan_settings if isinstance(scan_settings, list) else [scan_settings]
+        per_site = [{"kind": "scan", "scan_settings": dict(f)} for f in frames]
+
+    data = {"name": name, "context": context, "mode": mode,
+            "sites": sites, "per_site": per_site, "sample_frame": sample_frame}
     Recipe(**data)                       # raises before touching the disk
 
     path = Path(path)

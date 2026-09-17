@@ -16,7 +16,7 @@ async def sync_status_node(state: MeasurementState) -> MeasurementState:
             "expressed in frame coordinates without it (to_instrument_state would "
             "build ProbePosition(x_m=None) and fail pydantic validation).")
 
-    raw = await call("pfm_get_experiment_status")
+    raw = await call("get_experiment_status")
 
     if not calibration_is_fresh(cal, raw):
         raise RuntimeError(

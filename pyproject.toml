@@ -26,6 +26,7 @@ dependencies = [
     "pillow",                    # channel_utils - preview PNGs
     "scifireaders",              # .ibw reading
     "igor2",                     # scifireaders' Igor backend - NOT transitive, declare it
+    "scikit-image",
 ]
 
 [project.optional-dependencies]

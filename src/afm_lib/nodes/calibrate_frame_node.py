@@ -9,7 +9,7 @@ async def calibrate_frame_node(state: MeasurementState) -> MeasurementState:
     SIDE EFFECT: moves the tip. calibrate_xy_frame clears any force marker and
     drives the tip to the scan-frame centre. This is the first tip motion of the
     run — everything before it is read-only."""
-    data = await call("pfm_calibrate_xy_frame")
+    data = await call("calibrate_xy_frame")
     cal = to_scanner_calibration_state(data)
 
     print(f"[calibrate] offset ({cal.x_scanner_offset_m*1e6:+.3f}, "

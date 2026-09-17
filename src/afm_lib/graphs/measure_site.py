@@ -1,13 +1,15 @@
 from langgraph.graph import StateGraph, START, END
 
+from afm_lib.nodes.run_scan_node import run_scan_node
 from afm_lib.states.lib_experiment_state import LibExperimentState
 from afm_lib.nodes.next_measurement_node import (
-    next_measurement_node, route_after_next_measurement)
+    next_measurement_node, route_after_next_measurement, route_by_kind)
 from afm_lib.nodes.ensure_stage_node import ensure_stage_node
 from afm_lib.nodes.ensure_tip_node import ensure_tip_node
 from afm_lib.nodes.run_loop_node import run_loop_node
 from afm_lib.nodes.sync_status_node import sync_status_node
 from afm_lib.nodes.record_measurement_node import record_measurement_node
+from afm_lib.nodes.run_scan_node import run_scan_node
 
 
 def build_measure_site_graph():
@@ -19,6 +21,7 @@ def build_measure_site_graph():
     g.add_node("ensure_stage",     ensure_stage_node)
     g.add_node("ensure_tip",       ensure_tip_node)
     g.add_node("run_loop",         run_loop_node)
+    g.add_node("run_scan",         run_scan_node)
     g.add_node("sync_status",      sync_status_node)
     g.add_node("record",           record_measurement_node)
 
@@ -26,8 +29,9 @@ def build_measure_site_graph():
     g.add_conditional_edges("next_measurement", route_after_next_measurement,
                             {"measure": "ensure_stage", "site_done": END})
     g.add_edge("ensure_stage", "ensure_tip")
-    g.add_edge("ensure_tip",   "run_loop")
-    g.add_edge("run_loop",     "sync_status")
+    g.add_conditional_edges("ensure_tip", route_by_kind, {"loop": "run_loop", "scan": "run_scan"})
+    g.add_edge("run_loop", "sync_status")
+    g.add_edge("run_scan", "sync_status")
     g.add_edge("sync_status",  "record")
     g.add_edge("record",       "next_measurement")
     return g.compile()

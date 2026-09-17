@@ -3,6 +3,7 @@ from typing import Literal
 
 from afm_lib.schemas.loop_params import LoopParams        # note: loop_params, not loops_params
 from afm_lib.schemas.loop_review import LoopReview
+from afm_lib.schemas.image_metrics import ImageMetrics
 
 
 #channels schemes
@@ -89,6 +90,10 @@ class AnalysisState(TypedDict):
     file_channels: NotRequired[dict[str, Channel]]
     kind: NotRequired[Literal["spectrum", "loop", "image"]]
     preview_grid_path: NotRequired[str]  
+
+    #scan branch
+    px_m: NotRequired[float]                       # pixel size, set by the caller from the achieved frame
+    image_metrics: NotRequired[ImageMetrics]
 
     #scan branch
     # channel_recommendations: NotRequired[TaskChannelReccomendationReport]

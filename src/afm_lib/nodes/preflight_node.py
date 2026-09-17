@@ -5,14 +5,22 @@ import time
 from afm_lib.config import run_dir
 from afm_lib.instrument.session import call
 from afm_lib.states.measurement_state import MeasurementState 
+from afm_lib.states.lib_experiment_state import LibExperimentState
+
 def _fmt(v, scale=1.0, unit="", fmt=".1f"):
     """Status fields are None when unreadable — never let a print kill the run."""
     return "n/a" if v is None else f"{v*scale:{fmt}}{unit}"
 
-async def preflight_node(state: MeasurementState) -> MeasurementState:
+async def preflight_node(state: LibExperimentState) -> LibExperimentState:
     """Read-only readiness check. Runs BEFORE the first tip motion (calibration).
     Fails the run rather than driving an instrument in an unknown state."""
-    raw = await call("pfm_get_experiment_status")
+    raw = await call("get_experiment_status")
+
+    want = state["recipe"].mode
+    if raw.get("mode") != want:
+        raise RuntimeError(f"recipe needs mode {want!r} but the instrument has {raw.get('mode')!r} "
+                           "loaded — set it by hand (withdraw, set_imaging_mode, tune, setpoint, engage) "
+                           "and start again")
 
     missing = [k for k in ("stage_x_m", "stage_y_m") if raw.get(k) is None]
     if missing:

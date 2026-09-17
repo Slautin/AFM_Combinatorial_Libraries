@@ -1,5 +1,6 @@
 from afm_lib.config import new_run
 from afm_lib.states.lib_experiment_state import LibExperimentState
+from afm_lib.schemas.recipe import site_program
 
 
 async def init_run_node(state: LibExperimentState) -> LibExperimentState:
@@ -17,8 +18,8 @@ async def init_run_node(state: LibExperimentState) -> LibExperimentState:
               "status": "pending"}
              for i, s in enumerate(recipe.sites)]
 
-    n_points = sum(len(step.points_m) for step in recipe.per_site)
-    print(f"[init_run] {recipe.name}: {len(sites)} sites x {n_points} points "
-          f"= {len(sites) * n_points} loops -> {d}")
+    n_meas = len(site_program(recipe))
+    print(f"[init_run] {recipe.name}: {len(sites)} sites x {n_meas} measurements "
+          f"= {len(sites) * n_meas} total -> {d}")
 
     return {"sites": sites, "site_index": -1}
